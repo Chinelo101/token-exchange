@@ -13,6 +13,12 @@ contract Token{//basic structure of ERC token
 	//track balances
 	mapping(address => uint256) public balanceOf;
 
+	/*mapping for allowance; a nested mapping with a mapping
+	maps owners address to address of all spenders and max 
+	amount of tokens allowed for spending*/
+
+	mapping(address => mapping(address => uint256)) public allowance;
+
 
 	// a transfer event is required for ERC20 tokens - this format was pulled from eth docs
 	event Transfer(
@@ -21,6 +27,11 @@ contract Token{//basic structure of ERC token
 		uint256 value
 	);
 
+	event Approval(
+		address indexed owner, 
+		address indexed spender,
+		uint256 value
+	);
 
 	//send tokens
 	constructor(
@@ -53,6 +64,19 @@ contract Token{//basic structure of ERC token
 		emit Transfer(msg.sender, _to, _value);
 
 		return true;
+	}
+
+	function approve(address _spender, uint256 _value) 
+		public 
+		returns(bool success) 
+	{ 
+		require(_spender != address(0)); //address 0 = burn address
+	//update value of allowance
+		allowance[msg.sender][_spender] = _value;
+
+		emit Approval(msg.sender, _spender, _value);	
+		return true;
+
 	}
 
 
