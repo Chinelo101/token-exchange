@@ -90,9 +90,10 @@ contract Token{//basic structure of ERC token
 		public 
 		returns (bool success)
 	{
+
 		//check approval & sender has enough tokens 
-		require(_value <= balanceOf[_from]);
-		require(_value <= allowance[_from][msg.sender]);
+		require(_value <= balanceOf[_from], "insufficient balance");
+		require(_value <= allowance[_from][msg.sender], "user has not approved transaction");
 
 		//Reset allowance to avoid double spending
 		allowance[_from][msg.sender] -= _value;
