@@ -12,18 +12,16 @@ import "./Token.sol"; //import token smart contract into this one
 contract Exchange{
 	address public feeAccount;
 	uint256 public feePercent;
-
 	mapping(address => mapping(address => uint256)) public tokens; //token address, user address, how many tokens they've deposited
-
 	mapping(uint256 => _Order) public orders; //orders mapping, maps id to order struct 
-
 	uint256 public orderCount; //to track # of orders
+	mapping(uint256 => bool) public orderCancelled; //true/false
+
 
 	event Deposit(address token, address user, uint256 amount, uint256 balance);
-
 	event Withdraw(address token, address user, uint256 amount, uint256 balance);
-
 	event Order(uint256 id, address user, address tokenGet, uint256 amountGet, address tokenGive, uint256 amountGive, uint256 timestamp);
+	event Cancel(uint256 id, address user, address tokenGet, uint256 amountGet, address tokenGive, uint256 amountGive, uint256 timestamp);
 
 	//for storing orders information
 	struct _Order { 
@@ -136,6 +134,32 @@ contract Exchange{
 			_amountGet, 
 			_tokenGive, 
 			_amountGive, 
+			block.timestamp 
+		);
+	}
+
+
+	function cancelOrder(uint256 _id) public {
+		//Fetch Order
+		_Order storage _order = orders[_id];  // _Order, our struct is the data type for the _order variable and we're pulling this data from storage
+
+		//Ensure the caller of the function is the owner of the order
+		require(address(_order.user) == msg.sender);
+
+		//Order must exist
+		require(_order.id == _id);
+		
+		//Cancel Order
+		orderCancelled[_id] = true;
+
+		//Emit event
+		emit Cancel(
+			_order.id, 
+			msg.sender, 
+			_order.tokenGet, 
+			_order.amountGet, 
+			_order.tokenGive, 
+			_order.amountGive, 
 			block.timestamp 
 		);
 
