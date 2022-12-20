@@ -15,9 +15,28 @@ contract Exchange{
 
 	mapping(address => mapping(address => uint256)) public tokens; //token address, user address, how many tokens they've deposited
 
+	mapping(uint256 => _Order) public orders; //orders mapping, maps id to order struct 
+
+	uint256 public orderCount; //to track # of orders
+
 	event Deposit(address token, address user, uint256 amount, uint256 balance);
 
 	event Withdraw(address token, address user, uint256 amount, uint256 balance);
+
+	event Order(uint256 id, address user, address tokenGet, uint256 amountGet, address tokenGive, uint256 amountGive, uint256 timestamp);
+
+	//for storing orders information
+	struct _Order { 
+		//Attributes of the order
+		uint256 id; // unique identifier for order
+		address user; //user who made the order
+		address tokenGet; //address of the token they receive
+		uint256 amountGet; //amount they receive
+		address tokenGive; //address of the token they give
+		uint256 amountGive; //amount they give
+		uint256 timestamp; //when order was created
+	}
+	
 
 	//track fees collected by exchange
 	constructor(
@@ -73,4 +92,54 @@ contract Exchange{
 	{
 		return tokens[_token][_user];
 	}
+
+
+	//--------------------------
+	//MAKE & CANCEL ORDERS
+
+
+	function makeOrder(
+		address _tokenGet, 
+		uint256 _amountGet, 
+		address _tokenGive, 
+		uint256 _amountGive)
+		public
+	{
+	// Token Give (the token they want to spend) - which token, and how much?
+	// Token Get (the token they want to receive) - which token, and how much?
+
+
+		//prevent orders if tokens are not on exchange
+
+		require(balanceOf(_tokenGive, msg.sender) >= _amountGive);
+
+
+		//instantiate new orders
+
+		orderCount += 1;
+
+		orders[orderCount] = _Order(//populating order struct 
+			orderCount, //id 1, 2,3 etc
+			msg.sender, //user 
+			_tokenGet, //tokenGet
+			_amountGet, //amountGet
+			_tokenGive, //tokenGive
+			_amountGive, //amountGive
+			block.timestamp //timestamp
+		);
+
+		//Emit event
+		emit Order(
+			orderCount, 
+			msg.sender, 
+			_tokenGet, 
+			_amountGet, 
+			_tokenGive, 
+			_amountGive, 
+			block.timestamp 
+		);
+
+	}
 }
+
+
