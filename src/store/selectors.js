@@ -188,7 +188,7 @@ export const myFilledOrdersSelector = createSelector(
       //Decorate orders - add display attributes
       orders = decorateFilledOrders(orders, account, tokens)
 
-      console.log(orders)
+      //console.log(orders)
       return orders
   }
 )
